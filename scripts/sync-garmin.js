@@ -2,6 +2,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { unzipSync } from 'fflate';
 import { parseFit } from '../src/import.js';
+import { readGarminToken, readGarminJson } from './garmin-response.js';
 
 const required = ['GARMIN_PERSONAL_API_KEY', 'SUPABASE_URL', 'SUPABASE_SECRET_KEY', 'SUPABASE_USER_ID'];
 for (const key of required)
@@ -37,15 +38,14 @@ try {
   // Validate target identity before writing any personal data.
   const target = check(await supabase.auth.admin.getUserById(userId));
   if (target.user.id !== userId) throw new Error('No se pudo verificar el usuario de destino.');
-  const token = await (
+  const token = await readGarminToken(
     await request('/personalapitoken-service/personal-api/personal-api-key/token', {
       method: 'POST',
       headers: { Authorization: `ApiKey ${process.env.GARMIN_PERSONAL_API_KEY}` },
-    })
-  ).json();
-  if (!token.access_token) throw new Error('Garmin no devolvió un token de acceso.');
-  const headers = { Authorization: `Bearer ${token.access_token}` };
-  const json = async (path) => (await request(path, { headers })).json();
+    }),
+  );
+  const headers = { Authorization: `Bearer ${token}` };
+  const json = async (path) => readGarminJson(await request(path, { headers }));
   const known = new Map();
   let offset = 0;
   while (true) {

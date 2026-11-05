@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { gunzipSync, gzipSync, strToU8, strFromU8 } from 'fflate';
 let dbPromise;
 function db() {
   return (dbPromise ??= new Promise((resolve, reject) => {
@@ -69,9 +70,17 @@ export async function cloudLoad(supabase) {
       const batch = await Promise.all(
         page.slice(i, i + 6).map(async (row) => {
           const blob = check(
-            await supabase.storage.from('activity-files').download(`${session.user.id}/${row.id}.json`),
+            await supabase.storage
+              .from('activity-files')
+              .download(
+                `${session.user.id}/${row.id}.json${row.summary.detailFormat === 'gzip' ? '.gz' : ''}`,
+              ),
           );
-          const data = JSON.parse(await blob.text());
+          const text =
+            row.summary.detailFormat === 'gzip'
+              ? strFromU8(gunzipSync(new Uint8Array(await blob.arrayBuffer())))
+              : await blob.text();
+          const data = JSON.parse(text);
           return { ...data, ...row.summary, id: row.id };
         }),
       );
@@ -87,20 +96,22 @@ export async function cloudSave(supabase, activities) {
   if (!user) throw new Error('Inicia sesión antes de guardar en la nube.');
   for (const activity of activities) {
     const { points, laps, ...summary } = activity;
+    summary.detailFormat = 'gzip';
     check(
-      await supabase.storage
-        .from('activity-files')
-        .upload(
-          `${user.id}/${activity.id}.json`,
-          new Blob([JSON.stringify({ points, laps })], { type: 'application/json' }),
-          { upsert: true, contentType: 'application/json' },
-        ),
+      await supabase.storage.from('activity-files').upload(
+        `${user.id}/${activity.id}.json.gz`,
+        new Blob([gzipSync(strToU8(JSON.stringify({ points, laps })))], {
+          type: 'application/octet-stream',
+        }),
+        { upsert: true, contentType: 'application/octet-stream' },
+      ),
     );
     check(
       await supabase
         .from('activities')
         .upsert({ user_id: user.id, id: activity.id, summary }, { onConflict: 'user_id,id' }),
     );
+    activity.detailFormat = 'gzip';
   }
 }
 export async function cloudNotes(supabase, activity) {

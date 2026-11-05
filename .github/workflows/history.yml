@@ -5,6 +5,7 @@ on:
     - cron: '43 * * * *'
 permissions:
   contents: read
+  actions: write
 concurrency:
   group: garmin-private-sync
   cancel-in-progress: false
@@ -21,6 +22,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run sync:garmin
+        id: sync
         env:
           GARMIN_PERSONAL_API_KEY: ${{ secrets.GARMIN_PERSONAL_API_KEY }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -28,3 +30,14 @@ jobs:
           SUPABASE_USER_ID: ${{ secrets.SUPABASE_USER_ID }}
           HISTORY_BACKFILL: 'true'
           MAX_ACTIVITIES: '100'
+      - name: Continuar el siguiente lote pendiente
+        if: always() && steps.sync.outputs.continue_history == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'history.yml',
+              ref: 'main'
+            });

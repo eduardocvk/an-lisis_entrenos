@@ -1,9 +1,10 @@
 // Runs only in Node/GitHub Actions. Never import this module from the frontend.
 import { createClient } from '@supabase/supabase-js';
-import { unzipSync } from 'fflate';
+import { unzipSync, gzipSync, strToU8 } from 'fflate';
 import { parseFit } from '../src/import.js';
 import { readGarminToken, readGarminJson } from './garmin-response.js';
 import { healthMetrics } from './garmin-health.js';
+import { appendFileSync } from 'node:fs';
 
 const required = ['GARMIN_PERSONAL_API_KEY', 'SUPABASE_URL', 'SUPABASE_SECRET_KEY', 'SUPABASE_USER_ID'];
 for (const key of required)
@@ -115,6 +116,7 @@ try {
           run.tags = old.summary.tags;
         }
         const { points, laps, ...summary } = run;
+        summary.detailFormat = 'gzip';
         check(
           await supabase.storage.from('activity-files').upload(`${userId}/${run.id}.original.zip`, zip, {
             upsert: true,
@@ -124,9 +126,9 @@ try {
         check(
           await supabase.storage
             .from('activity-files')
-            .upload(`${userId}/${run.id}.json`, JSON.stringify({ points, laps }), {
+            .upload(`${userId}/${run.id}.json.gz`, gzipSync(strToU8(JSON.stringify({ points, laps }))), {
               upsert: true,
-              contentType: 'application/json',
+              contentType: 'application/octet-stream',
             }),
         );
         check(
@@ -178,6 +180,7 @@ try {
       if (!existingDays.has(day)) healthDates.push(day);
     }
   }
+  let healthImported = 0;
   for (const day of healthDates) {
     const raw = {};
     for (const [key, path] of Object.entries({
@@ -198,6 +201,7 @@ try {
     check(
       await supabase.from('daily_health').upsert(health, { onConflict: 'user_id,day', defaultToNull: false }),
     );
+    healthImported++;
   }
   const message = `${imported} actividades importadas. ${issues.length} incidencias.${reachedLimit ? ' Límite del lote alcanzado; vuelve a ejecutar con full_history=true para continuar.' : ''}`;
   check(
@@ -206,6 +210,13 @@ try {
       .insert({ user_id: userId, status: issues.length ? 'partial' : 'success', imported, message }),
   );
   console.log(message);
+  console.log(`${healthImported} días de recuperación consultados y guardados.`);
+  for (const issue of new Set(issues)) console.error(issue);
+  if (process.env.GITHUB_OUTPUT)
+    appendFileSync(
+      process.env.GITHUB_OUTPUT,
+      `continue_history=${backfill && (reachedLimit || healthDates.length === 90) && (imported > 0 || healthImported > 0)}\n`,
+    );
   if (issues.length) process.exitCode = 1;
 } catch (e) {
   await supabase.from('sync_runs').insert({ user_id: userId, status: 'error', imported, message: e.message });

@@ -13,6 +13,7 @@ export async function readGarminToken(response, now = Date.now()) {
   return token;
 }
 export async function readGarminJson(response) {
+  if (response.status === 204) return null;
   try {
     return await response.json();
   } catch {

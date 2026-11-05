@@ -62,7 +62,8 @@ try {
     if (rows.length < 500) break;
     offset += 500;
   }
-  const full = process.env.FULL_HISTORY === 'true' || known.size === 0;
+  const backfill = process.env.HISTORY_BACKFILL === 'true';
+  const full = backfill || process.env.FULL_HISTORY === 'true' || known.size === 0;
   const startDate =
     process.env.START_DATE || (full ? '' : new Date(Date.now() - 14 * 86400000).toISOString().slice(0, 10));
   if (startDate && !/^\d{4}-\d{2}-\d{2}$/.test(startDate))
@@ -144,11 +145,40 @@ try {
     start += 50;
   }
   // Health is imported by calendar date. Unknown fields remain null; raw is retained.
-  const days = Math.min(31, Math.max(1, Number(process.env.HEALTH_DAYS) || 7));
-  for (let i = 0; i < days; i++) {
-    const day = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Madrid' }).format(
-      new Date(Date.now() - i * 86400000),
-    );
+  const today = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Madrid' }).format(new Date());
+  let healthDates = Array.from({ length: 7 }, (_, i) =>
+    new Date(Date.parse(today + 'T12:00:00Z') - i * 86400000).toISOString().slice(0, 10),
+  );
+  if (backfill) {
+    const starts = [...known.values()]
+      .map((r) => r.summary.start?.slice(0, 10))
+      .filter(Boolean)
+      .sort();
+    const existingDays = new Set();
+    for (let offset = 0; ; offset += 500) {
+      const page = check(
+        await supabase
+          .from('daily_health')
+          .select('day')
+          .eq('user_id', userId)
+          .order('day')
+          .range(offset, offset + 499),
+      );
+      page.forEach((r) => existingDays.add(r.day));
+      if (page.length < 500) break;
+    }
+    healthDates = [];
+    const first = starts[0] || today;
+    for (
+      let d = Date.parse(first + 'T12:00:00Z');
+      d <= Date.parse(today + 'T12:00:00Z') && healthDates.length < 90;
+      d += 86400000
+    ) {
+      const day = new Date(d).toISOString().slice(0, 10);
+      if (!existingDays.has(day)) healthDates.push(day);
+    }
+  }
+  for (const day of healthDates) {
     const raw = {};
     for (const [key, path] of Object.entries({
       sleep: `/sleep-service/sleep/dailySleep?date=${day}`,
@@ -158,11 +188,13 @@ try {
       try {
         raw[key] = await json(path);
       } catch (e) {
-        issues.push(e.message);
+        if (e.message.includes('HTTP 404')) raw[key] = null;
+        else issues.push(e.message);
       }
       await sleep(200);
     }
     const health = { user_id: userId, day, raw, ...healthMetrics(raw) };
+    if (Object.keys(raw).length !== 3) continue;
     check(
       await supabase.from('daily_health').upsert(health, { onConflict: 'user_id,day', defaultToNull: false }),
     );

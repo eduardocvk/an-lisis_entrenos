@@ -103,7 +103,7 @@ function empty(message = 'Importa tus primeras carreras para empezar a encontrar
 const metric = (label, value, unit, foot) =>
   `<article class="metric"><span>${label}</span><div>${value}<small>${unit}</small></div><p>${foot}</p></article>`;
 const panel = (title, subtitle, body, cls = '') =>
-  `<section class="panel ${cls}"><div class="panel-heading"><div><h2>${title}</h2><p>${subtitle}</p></div></div>${body}</section>`;
+  `<section class="panel ${cls}"><div class="panel-heading"><div><h2>${title}</h2>${subtitle ? `<details class="chart-help"><summary aria-label="Información de ${esc(title)}">ⓘ</summary><p>${subtitle}</p></details>` : ''}</div></div>${body}</section>`;
 const plot = (id, description) =>
   `<div id="${id}" class="chart" role="img" aria-label="${esc(description)}"></div>`;
 function addChart(id, options) {
@@ -187,6 +187,50 @@ function renderContent() {
           itemStyle: { borderRadius: [5, 5, 0, 0] },
         },
       ],
+    });
+    const months = new Map();
+    const weekdays = Array(7).fill(0);
+    for (const a of list) {
+      const key = dayKey(a.start).slice(0, 7);
+      months.set(key, (months.get(key) || 0) + a.distance / 1000);
+      weekdays[(new Date(dayKey(a.start) + 'T12:00:00Z').getUTCDay() + 6) % 7]++;
+    }
+    const orderedMonths = [...months.keys()].sort();
+    document
+      .querySelector('#weekly')
+      .closest('.two-col')
+      .insertAdjacentHTML(
+        'afterend',
+        '<div class="analytics-grid">' +
+          panel('Volumen mensual', 'Kilómetros registrados por mes', plot('monthly', 'Kilómetros por mes')) +
+          panel(
+            'Cuándo corres',
+            'Número de sesiones por día de la semana',
+            plot('weekdays', 'Sesiones por día de la semana'),
+          ) +
+          panel(
+            'Duración de las sesiones',
+            'Minutos por entrenamiento',
+            plot('session-duration', 'Duración de cada entrenamiento'),
+          ) +
+          '</div>',
+      );
+    addChart('monthly', {
+      labels: orderedMonths,
+      yName: 'km',
+      zoom: true,
+      series: [{ name: 'Distancia', type: 'bar', data: orderedMonths.map((k) => +months.get(k).toFixed(1)) }],
+    });
+    addChart('weekdays', {
+      labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+      yName: 'sesiones',
+      series: [{ name: 'Sesiones', type: 'bar', data: weekdays }],
+    });
+    addChart('session-duration', {
+      labels: [...list].reverse().map((a) => date(a.start)),
+      yName: 'min',
+      zoom: true,
+      series: [{ name: 'Duración', data: [...list].reverse().map((a) => +(a.duration / 60).toFixed(1)) }],
     });
     resources.push(drawMap(document.querySelector('#mini-map'), list, 'coverage', openDetail));
   } else if (state.view === 'activities') {
@@ -345,7 +389,7 @@ function renderContent() {
       .filter((h) => (!state.from || h.day >= state.from) && (!state.to || h.day <= state.to))
       .sort((a, b) => a.day.localeCompare(b.day));
     content.innerHTML = health.length
-      ? `<div class="metrics">${metric('SUEÑO MEDIO', num(mean(health.map((h) => h.sleep_hours)), 1), 'h', 'Solo noches con dato')}${metric('HRV MEDIA', num(mean(health.map((h) => h.hrv)), 1), 'ms', 'Solo días con dato')}${metric('PULSO EN REPOSO', num(mean(health.map((h) => h.resting_hr))), 'ppm', 'Solo días con dato')}</div>${panel('Descanso y entrenamiento', 'Datos diarios de Garmin; las asociaciones no demuestran causalidad.', plot('sleep', 'Horas de sueño por día') + plot('hrv', 'HRV por día') + plot('recovery-rhr', 'Pulso en reposo por día') + plot('recovery-training', 'Kilómetros y esfuerzo percibido por día'))}<p class="info-strip">Se muestran hasta los últimos 366 registros diarios sincronizados. Un archivo FIT/GPX de actividad no contiene el histórico diario de sueño o HRV.</p>`
+      ? `<div class="metrics">${metric('SUEÑO MEDIO', num(mean(health.map((h) => h.sleep_hours)), 1), 'h', 'Solo noches con dato')}${metric('HRV MEDIA', num(mean(health.map((h) => h.hrv)), 1), 'ms', 'Solo días con dato')}${metric('PULSO EN REPOSO', num(mean(health.map((h) => h.resting_hr))), 'ppm', 'Solo días con dato')}</div>${panel('Descanso y entrenamiento', 'Datos diarios de Garmin; las asociaciones no demuestran causalidad.', '<div class="recovery-grid">' + panel('Sueño', '', plot('sleep', 'Horas de sueño por día')) + panel('HRV', '', plot('hrv', 'HRV por día')) + panel('Pulso en reposo', '', plot('recovery-rhr', 'Pulso en reposo por día')) + panel('Carrera diaria', '', plot('recovery-training', 'Kilómetros por día')) + '</div>')}<p class="info-strip">${health.length} días consultados · Sueño: ${health.filter((h) => finite(h.sleep_hours)).length} · HRV: ${health.filter((h) => finite(h.hrv)).length} · Pulso en reposo: ${health.filter((h) => finite(h.resting_hr)).length}. Los huecos indican datos no disponibles.</p>`
       : panel(
           'Conecta el descanso con tus carreras',
           'Sueño, HRV y pulso en reposo',

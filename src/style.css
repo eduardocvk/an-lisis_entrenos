@@ -1,12 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
 :root {
   font-family: 'DM Sans', system-ui, sans-serif;
-  color: #213b37;
-  background: #f4f6f3;
+  color: #252b40;
+  background: #f4f3f7;
   font-synthesis: none;
   --ink: #143b36;
   --muted: #73817a;
-  --teal: #087f79;
+  --teal: #5966ce;
   --border: #e1e7e0;
 }
 * {
@@ -54,7 +54,7 @@ a {
   position: fixed;
   inset: 0 auto 0 0;
   width: 246px;
-  background: #112e2c;
+  background: #222b45;
   color: #a8bdb6;
   padding: 35px 20px 20px;
   display: flex;
@@ -75,7 +75,7 @@ a {
 }
 .brand-mark {
   font-size: 29px;
-  background: #d8edb5;
+  background: #e6bd78;
   color: #153c34;
   border-radius: 12px;
   width: 42px;
@@ -85,13 +85,13 @@ a {
   padding-right: 4px;
 }
 .brand-dot {
-  font-size: 9px;
-  color: #d8edb5;
+  font-size: 14px;
+  color: #e6bd78;
   margin-top: 14px;
   margin-left: -8px;
 }
 .nav-caption {
-  font-size: 9px;
+  font-size: 14px;
   letter-spacing: 1.5px;
   margin: 42px 13px 14px;
   color: #7d9b91;
@@ -110,17 +110,17 @@ a {
   color: inherit;
   border-radius: 8px;
   padding: 11px 13px;
-  font-size: 13px;
+  font-size: 15px;
   width: 100%;
   transition: background 0.15s;
 }
 .sidebar button:hover {
-  background: #1b3e39;
+  background: #343e5c;
   color: #fff;
 }
 .sidebar button.active {
   color: #e7f4d4;
-  background: #244940;
+  background: #394362;
 }
 .sidebar button.active svg {
   color: #cce6a0;
@@ -133,7 +133,7 @@ a {
   padding: 14px 12px 22px;
   display: flex;
   gap: 10px;
-  font-size: 11px;
+  font-size: 14px;
   border-bottom: 1px solid #2d4842;
   margin-bottom: 12px;
 }
@@ -144,7 +144,7 @@ a {
 .privacy-note small {
   display: block;
   color: #819e92;
-  font-size: 9px;
+  font-size: 14px;
   line-height: 1.7;
   margin-top: 5px;
 }
@@ -162,7 +162,7 @@ header {
   gap: 15px;
 }
 .breadcrumb {
-  font-size: 10px;
+  font-size: 15px;
   font-weight: 600;
   letter-spacing: 1.5px;
   color: #6d7e75;
@@ -188,7 +188,7 @@ header {
 .text-button {
   border-radius: 7px;
   padding: 11px 16px;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   display: inline-flex;
   align-items: center;
@@ -196,11 +196,11 @@ header {
   gap: 7px;
 }
 .primary {
-  background: #0d6e62;
+  background: #5361c3;
   color: white;
 }
 .primary:hover {
-  background: #09564d;
+  background: #38469e;
 }
 .secondary {
   background: #fff;
@@ -215,7 +215,7 @@ header {
   color: #537267;
 }
 .status-pill {
-  font-size: 10px;
+  font-size: 15px;
   color: #537753;
   background: #edf3e8;
   padding: 7px 10px;
@@ -235,7 +235,7 @@ main {
   gap: 15px;
 }
 .eyebrow {
-  font-size: 9px;
+  font-size: 14px;
   letter-spacing: 2px;
   font-weight: 700;
   color: #6d8678;
@@ -245,7 +245,7 @@ h1,
 h2,
 h3 {
   font-family: Manrope, system-ui, sans-serif;
-  color: #1c3931;
+  color: #20283d;
 }
 h1 {
   font-size: 30px;
@@ -255,7 +255,7 @@ h1 {
   margin: 0 0 8px;
 }
 .page-heading p:last-child {
-  font-size: 13px;
+  font-size: 15px;
   color: var(--muted);
   margin: 0;
 }
@@ -271,7 +271,7 @@ h1 {
   flex-wrap: wrap;
 }
 .filters label {
-  font-size: 9px;
+  font-size: 14px;
   letter-spacing: 0.5px;
   font-weight: 600;
   color: #708072;
@@ -284,7 +284,7 @@ h1 {
   border: 0;
   background: transparent;
   color: #364d41;
-  font-size: 12px;
+  font-size: 14px;
   min-height: 25px;
 }
 .filters label:not(:first-child) {
@@ -297,7 +297,7 @@ h1 {
 }
 .filters .text-button {
   padding: 7px;
-  font-size: 10px;
+  font-size: 15px;
 }
 .metrics {
   display: grid;
@@ -313,7 +313,7 @@ h1 {
   overflow: hidden;
 }
 .metric > span {
-  font-size: 9px;
+  font-size: 14px;
   color: #7c887a;
   letter-spacing: 1px;
   font-weight: 600;
@@ -328,14 +328,14 @@ h1 {
 }
 .metric div small {
   font-family: 'DM Sans', system-ui;
-  font-size: 12px;
+  font-size: 14px;
   letter-spacing: 0;
   font-weight: 400;
   color: #829082;
   margin-left: 7px;
 }
 .metric p {
-  font-size: 10px;
+  font-size: 15px;
   color: #849080;
   margin: 0;
   line-height: 1.7;
@@ -361,7 +361,7 @@ h1 {
   letter-spacing: -0.3px;
 }
 .panel-heading p {
-  font-size: 11px;
+  font-size: 14px;
   color: var(--muted);
   margin: 0;
   line-height: 1.7;
@@ -396,7 +396,7 @@ h1 {
   gap: 20px;
   flex-wrap: wrap;
   margin-bottom: 20px;
-  font-size: 11px;
+  font-size: 14px;
 }
 .map-toolbar label {
   display: flex;
@@ -420,12 +420,12 @@ h1 {
 table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 12px;
+  font-size: 14px;
   white-space: nowrap;
 }
 th {
   text-align: left;
-  font-size: 9px;
+  font-size: 14px;
   font-weight: 600;
   letter-spacing: 0.6px;
   text-transform: uppercase;
@@ -441,7 +441,7 @@ tbody tr:last-child td {
   border-bottom: 0;
 }
 td small {
-  font-size: 10px;
+  font-size: 15px;
   color: #879184;
   display: block;
   margin-top: 5px;
@@ -451,7 +451,7 @@ td small {
   color: #245a4d;
   padding: 0;
   text-align: left;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   max-width: 300px;
   white-space: normal;
@@ -460,7 +460,7 @@ td small {
   text-decoration: underline;
 }
 .info-strip {
-  font-size: 11px;
+  font-size: 14px;
   line-height: 1.8;
   background: #eaf0e3;
   color: #63745e;
@@ -469,14 +469,14 @@ td small {
   margin: 20px 0;
 }
 .hint {
-  font-size: 11px;
+  font-size: 14px;
   color: var(--muted);
   line-height: 1.8;
 }
 .no-data {
   padding: 25px 0;
   color: var(--muted);
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1.9;
 }
 .welcome {
@@ -500,7 +500,7 @@ td small {
   display: inline-block;
   border-radius: 4px;
   padding: 6px 9px;
-  font-size: 9px;
+  font-size: 14px;
   letter-spacing: 0.8px;
   background: #e9f0df;
   color: #4f7448;
@@ -523,7 +523,7 @@ td small {
   color: #d6e8b7;
 }
 .welcome p {
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.8;
   color: #b0c3ad;
   max-width: 350px;
@@ -531,7 +531,7 @@ td small {
 .welcome-features {
   display: flex;
   gap: 25px;
-  font-size: 10px;
+  font-size: 15px;
   color: #d2dfc3;
   margin-top: 20px;
 }
@@ -568,14 +568,14 @@ td small {
   margin: 17px 0 8px;
 }
 .empty p {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--muted);
   margin: 0 0 20px;
 }
 .empty small {
   display: block;
   color: #8a9483;
-  font-size: 10px;
+  font-size: 15px;
   margin-top: 12px;
 }
 footer {
@@ -584,7 +584,7 @@ footer {
   padding: 21px 0;
   display: flex;
   gap: 16px;
-  font-size: 9px;
+  font-size: 14px;
   letter-spacing: 1px;
   color: #8c9688;
 }
@@ -595,7 +595,7 @@ footer span:last-child {
   margin-left: auto;
 }
 .notice {
-  font-size: 12px;
+  font-size: 14px;
   background: #e3efdf;
   border: 1px solid #c4d7bb;
   border-radius: 8px;
@@ -619,7 +619,7 @@ dialog {
   width: 900px;
   max-height: 90vh;
   padding: 35px;
-  color: #213b37;
+  color: #252b40;
   background: #fafcf8;
 }
 dialog::backdrop {
@@ -657,7 +657,7 @@ dialog form label {
   display: flex;
   flex-direction: column;
   gap: 7px;
-  font-size: 12px;
+  font-size: 14px;
   color: #627763;
   margin: 15px 0;
 }
@@ -671,7 +671,7 @@ dialog textarea {
   width: 100%;
 }
 dialog p {
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.8;
 }
 dialog hr {
@@ -697,11 +697,11 @@ dialog hr {
   padding: 20px;
 }
 .journal-card small {
-  font-size: 10px;
+  font-size: 15px;
   color: var(--muted);
 }
 .journal-card p {
-  font-size: 12px;
+  font-size: 14px;
   color: #75816e;
 }
 .journal-card .notes {
@@ -715,21 +715,21 @@ dialog hr {
 }
 .lap-group summary {
   cursor: pointer;
-  font-size: 13px;
+  font-size: 15px;
   color: #375b4b;
 }
 .lap-group summary span {
-  font-size: 11px;
+  font-size: 14px;
   color: var(--muted);
   margin-left: 15px;
 }
 input[type='checkbox'] {
-  accent-color: #087f79;
+  accent-color: #5966ce;
   width: 17px;
   height: 17px;
 }
 .leaflet-control-attribution {
-  font-size: 9px !important;
+  font-size: 14px !important;
 }
 @media (min-width: 1500px) {
   main {
@@ -783,7 +783,7 @@ input[type='checkbox'] {
     display: none;
   }
   .breadcrumb {
-    font-size: 9px;
+    font-size: 14px;
   }
 }
 @media (max-width: 800px) {
@@ -819,7 +819,7 @@ input[type='checkbox'] {
     white-space: nowrap;
     padding: 9px 12px;
     flex-shrink: 0;
-    font-size: 11px;
+    font-size: 14px;
   }
   .sidebar nav svg {
     width: 16px;
@@ -849,10 +849,10 @@ input[type='checkbox'] {
     font-size: 27px;
   }
   .page-heading p:last-child {
-    font-size: 11px;
+    font-size: 14px;
   }
   .page-heading > .secondary {
-    font-size: 10px;
+    font-size: 15px;
     padding: 9px;
   }
   .metrics {
@@ -909,13 +909,13 @@ input[type='checkbox'] {
     gap: 8px;
   }
   .zone-inputs label {
-    font-size: 10px;
+    font-size: 15px;
   }
   footer {
     flex-wrap: wrap;
   }
   .status-pill {
-    font-size: 9px;
+    font-size: 14px;
   }
   .header-actions {
     gap: 5px;
@@ -934,5 +934,270 @@ input[type='checkbox'] {
   * {
     scroll-behavior: auto !important;
     transition: none !important;
+  }
+}
+
+/* Rastro: tinta, papel y acentos cálidos. */
+:root {
+  color: #252b40;
+  background: #f5f4f8;
+  --ink: #252b40;
+  --muted: #697087;
+  --teal: #5966ce;
+  --border: #e1e2eb;
+  font-family: system-ui, sans-serif;
+  font-size: 17px;
+}
+h1,
+h2,
+h3,
+.brand,
+.metric > div {
+  font-family: system-ui, sans-serif;
+  color: #252b40;
+}
+.sidebar {
+  background: #232b43;
+  color: #c5c9da;
+}
+.sidebar button.active {
+  background: #414868;
+  color: #fff;
+}
+.sidebar button.active svg {
+  color: #efb98a;
+}
+.brand {
+  color: #fff;
+}
+.brand-mark {
+  background: #eea177;
+  color: #292e47;
+}
+.sidebar button:hover {
+  background: #343c58;
+}
+.nav-caption,
+.eyebrow,
+.breadcrumb,
+.brand-dot {
+  display: none;
+}
+.page-heading #page-subtitle {
+  display: none;
+}
+header {
+  background: #fff;
+}
+.primary {
+  background: #5662cb;
+}
+.primary:hover {
+  background: #414da9;
+}
+.activity-link {
+  color: #4b54b4;
+}
+.status-pill,
+.tag {
+  background: #eeedf9;
+  color: #5059a9;
+}
+.privacy-note svg {
+  color: #eab185;
+}
+.welcome {
+  background: #262e49;
+}
+.welcome h2 em {
+  color: #efb58d;
+}
+.welcome p {
+  color: #dddde9;
+}
+.sidebar button {
+  font-size: 16px;
+  padding: 12px;
+}
+.sidebar-bottom button {
+  font-size: 15px;
+}
+.sidebar nav {
+  gap: 3px;
+}
+.sidebar {
+  overflow-y: auto;
+}
+.privacy-note {
+  color: #c3c7d6;
+}
+.privacy-note small {
+  color: #a5adc5;
+}
+h1 {
+  font-size: 36px;
+  letter-spacing: -1px;
+}
+.panel h2 {
+  font-size: 21px;
+}
+.panel {
+  border-radius: 4px;
+  box-shadow: none;
+}
+.metric {
+  border-radius: 4px;
+  border-top: 3px solid #7776c9;
+}
+.metric:nth-child(2) {
+  border-top-color: #e58d6c;
+}
+.metric:nth-child(3) {
+  border-top-color: #d2ad59;
+}
+.metric:nth-child(4) {
+  border-top-color: #668dc3;
+}
+.metric > div {
+  font-size: 35px;
+}
+.metric > span {
+  font-size: 13px;
+  color: #656c82;
+}
+.metric p {
+  font-size: 13px;
+  color: #72788b;
+}
+.metric div small {
+  font-size: 16px;
+}
+.filters {
+  background: #fff;
+  border-radius: 4px;
+}
+.filters input,
+.filters select {
+  font-size: 16px;
+}
+.filters label {
+  font-size: 13px;
+}
+table {
+  font-size: 16px;
+}
+th {
+  font-size: 13px;
+  background: #f2f2f8;
+}
+td small {
+  font-size: 13px;
+}
+.activity-link {
+  font-size: 16px;
+}
+.primary,
+.secondary,
+.text-button {
+  font-size: 15px;
+}
+.chart {
+  height: 330px;
+}
+.analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+}
+.analytics-grid > .panel:last-child {
+  grid-column: 1/-1;
+}
+.recovery-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+.recovery-grid .panel {
+  border: 0;
+  padding: 10px;
+  margin: 0;
+}
+.chart-help {
+  font-size: 14px;
+  position: relative;
+}
+.panel-heading > div {
+  width: 100%;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.chart-help summary {
+  cursor: pointer;
+  color: #8589a2;
+  list-style: none;
+}
+.chart-help p {
+  background: #f2f2f8;
+  padding: 12px;
+  line-height: 1.6;
+  max-width: 480px;
+}
+.hint {
+  font-size: 14px;
+}
+.info-strip {
+  font-size: 14px;
+  background: #eeedf7;
+  color: #626780;
+}
+.page-heading {
+  margin-bottom: 26px;
+}
+footer {
+  font-size: 12px;
+  color: #7d8295;
+}
+.metric p:empty {
+  display: none;
+}
+@media (max-width: 800px) {
+  h1 {
+    font-size: 30px;
+  }
+  .sidebar button {
+    font-size: 15px;
+  }
+  .analytics-grid,
+  .recovery-grid {
+    grid-template-columns: 1fr;
+  }
+  .analytics-grid > .panel:last-child {
+    grid-column: auto;
+  }
+  .metric > div {
+    font-size: 28px;
+  }
+  .panel h2 {
+    font-size: 19px;
+  }
+  .chart {
+    height: 300px;
+  }
+  header {
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 64px;
+    padding: 12px 18px;
+  }
+  .header-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  .sidebar {
+    overflow: visible;
+  }
+  .filters .text-button {
+    font-size: 13px;
   }
 }

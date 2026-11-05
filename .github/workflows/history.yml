@@ -1,0 +1,30 @@
+name: Completar histórico Garmin
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '43 * * * *'
+permissions:
+  contents: read
+concurrency:
+  group: garmin-private-sync
+  cancel-in-progress: false
+jobs:
+  history:
+    if: github.event_name == 'workflow_dispatch' || vars.GARMIN_SYNC_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run sync:garmin
+        env:
+          GARMIN_PERSONAL_API_KEY: ${{ secrets.GARMIN_PERSONAL_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          SUPABASE_USER_ID: ${{ secrets.SUPABASE_USER_ID }}
+          HISTORY_BACKFILL: 'true'
+          MAX_ACTIVITIES: '100'

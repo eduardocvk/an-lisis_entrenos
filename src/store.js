@@ -114,11 +114,16 @@ export async function cloudNotes(supabase, activity) {
   );
 }
 export async function healthLoad(supabase) {
-  return check(
-    await supabase
-      .from('daily_health')
-      .select('day,sleep_hours,hrv,resting_hr')
-      .order('day', { ascending: false })
-      .limit(366),
-  );
+  const rows = [];
+  for (let offset = 0; ; offset += 500) {
+    const page = check(
+      await supabase
+        .from('daily_health')
+        .select('day,sleep_hours,hrv,resting_hr')
+        .order('day', { ascending: false })
+        .range(offset, offset + 499),
+    );
+    rows.push(...page);
+    if (page.length < 500) return rows;
+  }
 }

@@ -10,6 +10,10 @@ El proyecto independiente `rastro-entrenos` está en la organización `eduardocv
 
 ## Primera versión
 
+La interfaz usa azul tinta, violeta y coral, texto ampliado y explicaciones desplegables. La vista general añade volumen mensual, frecuencia por día de la semana y duración por sesión. Recuperación muestra todos los registros sincronizados y el número de días con mediciones reales.
+
+El workflow **Completar histórico Garmin** recorre todas las carreras, omite las ya importadas y consulta hasta 90 días pendientes de recuperación por ejecución desde la primera carrera conocida. Se ejecuta cada hora mientras `GARMIN_SYNC_ENABLED=true`; comparte el bloqueo con la sincronización habitual. Un día sin medición no se convierte en cero. Los errores temporales quedan pendientes de reintento. La disponibilidad anterior depende del histórico conservado por Garmin y de los dispositivos utilizados.
+
 - Importación múltiple de FIT con el SDK oficial de Garmin, GPX con tiempos, ZIP de FIT y copias JSON de Rastro. Rechaza archivos dañados y actividades FIT que no sean de carrera. No contiene entrenamientos ficticios.
 - Resumen, explorador con filtros, kilómetros por semana, ritmo global ponderado y desnivel disponible.
 - Detalle de sesión con mapa, pulso, ritmo, altitud, cadencia y potencia cuando existen. Selección de intervalo de distancia para resaltarlo en el mapa.

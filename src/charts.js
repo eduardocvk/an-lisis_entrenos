@@ -25,10 +25,10 @@ export function chart(
 ) {
   const instance = echarts.init(el);
   instance.setOption({
-    color: ['#087f79', '#d88c43', '#7787b4', '#d06078'],
-    textStyle: { fontFamily: 'system-ui', color: '#667976' },
+    color: ['#5b63d3', '#ec7955', '#d5a742', '#4386c5'],
+    textStyle: { fontFamily: 'system-ui', color: '#596078', fontSize: 14 },
     tooltip: { trigger: scatter ? 'item' : 'axis', renderMode: 'richText' },
-    legend: { bottom: 0, type: 'scroll' },
+    legend: { show: series.length > 1, bottom: 0, type: 'scroll' },
     grid: { left: 58, right: 24, top: 30, bottom: zoom ? 85 : 65 },
     xAxis: scatter
       ? { type: 'value', name: 'Pulso medio (ppm)', nameLocation: 'middle', nameGap: 30 }

@@ -35,9 +35,9 @@ Vite muestra la URL y puerto reales. `base: './'` permite servir el build desde 
 
 En Settings → Pages selecciona GitHub Actions como fuente y añade la variable de Actions `PAGES_ENABLED=true`. El workflow `.github/workflows/pages.yml` ejecuta pruebas, compila y publica `dist` al subir a `main` cuando esa variable está activa. Sin ella, valida y genera el artefacto, conservando la publicación desactivada hasta resolver el plan. En pull requests solo comprueba y compila.
 
-**El repositorio es privado.** Pages desde repositorios privados requiere un plan compatible (por ejemplo, GitHub Pro para cuentas personales). La web publicada puede ser pública aunque el repositorio sea privado; no se incluyen actividades, claves ni archivos personales en `dist`. No es necesario hacer público el repositorio para usar Supabase. No cambies su visibilidad para sortear una limitación del plan sin decidirlo expresamente.
+**El código y los registros de Actions son públicos.** Las actividades, credenciales y archivos personales no se incluyen en Git ni en `dist`. Los datos de entrenamiento se conservan en el navegador o en Supabase con permisos privados. El sincronizador informa de servicios y códigos HTTP sin incluir identificadores de actividades ni fechas en sus errores HTTP.
 
-URL prevista, una vez habilitado y completado el despliegue: `https://eduardocvk.github.io/an-lisis_entrenos/`.
+URL publicada: `https://eduardocvk.github.io/an-lisis_entrenos/`.
 
 ## Configurar Supabase
 
@@ -75,9 +75,9 @@ En GitHub → Settings → Secrets and variables → Actions configura estos **s
 | `SUPABASE_SECRET_KEY`     | Clave secreta del servidor (`sb_secret_…` o antigua `service_role`) |
 | `SUPABASE_USER_ID`        | UUID exacto de tu usuario en Supabase Auth                          |
 
-La clave secreta de Supabase tiene privilegios amplios: queda exclusivamente en el workflow privado, nunca en variables `VITE_*`, ajustes del navegador o código cliente. El sincronizador comprueba que existe el usuario de destino antes de escribir.
+La clave secreta de Supabase tiene privilegios amplios: queda exclusivamente en los secrets de Actions, nunca en variables `VITE_*`, ajustes del navegador o código cliente. El sincronizador comprueba que existe el usuario de destino antes de escribir. Que el repositorio sea público no convierte los secrets en valores públicos; no los imprimas en los logs.
 
-1. Ejecuta manualmente **Sincronizar Garmin (privado)** en Actions.
+1. Ejecuta manualmente **Sincronizar Garmin** en Actions.
 2. Primera carga: activa `full_history`, con lotes de 100 actividades por defecto. Repite con `full_history=true` hasta completar el histórico. Un límite alcanzado se informa en el resultado. El número puede ajustarse hasta 500 por ejecución.
 3. Sin carga completa, se buscan actividades de los últimos 14 días; las ya importadas se omiten. `start_date` permite un periodo explícito. Las ediciones posteriores de actividades ya importadas no se replican automáticamente en esta versión.
 4. Se consultan siete días de recuperación por ejecución. Se guardan campos conocidos y la respuesta original; los campos ausentes no se inventan ni borran métricas previamente recogidas.

@@ -26,7 +26,9 @@ async function request(path, options = {}) {
       await sleep(2000 * 2 ** attempt);
       continue;
     }
-    throw new Error(`Garmin HTTP ${response.status} en ${path.split('?')[0]}.`);
+    // Actions logs are public: report the service, never activity IDs or dates.
+    const service = path.split('/').filter(Boolean)[0];
+    throw new Error(`Garmin HTTP ${response.status} en ${service}.`);
   }
 }
 let imported = 0;

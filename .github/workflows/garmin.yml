@@ -1,4 +1,4 @@
-name: Sincronizar Garmin (privado)
+name: Sincronizar Garmin
 on:
   workflow_dispatch:
     inputs:

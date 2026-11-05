@@ -25,10 +25,14 @@ export const localSave = (activities) =>
   });
 export function cloudConfig() {
   try {
-    return JSON.parse(localStorage.getItem('rastro-cloud') || 'null');
+    const saved = JSON.parse(localStorage.getItem('rastro-cloud') || 'null');
+    if (saved?.url && saved?.key) return saved;
   } catch {
-    return null;
+    // A malformed local setting must not prevent the deployed configuration loading.
   }
+  const url = import.meta.env?.VITE_SUPABASE_URL;
+  const key = import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY;
+  return url && key ? { url, key } : null;
 }
 export function client(config = cloudConfig()) {
   if (!config?.url || !config?.key) return null;

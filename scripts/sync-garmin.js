@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { unzipSync } from 'fflate';
 import { parseFit } from '../src/import.js';
 import { readGarminToken, readGarminJson } from './garmin-response.js';
+import { healthMetrics } from './garmin-health.js';
 
 const required = ['GARMIN_PERSONAL_API_KEY', 'SUPABASE_URL', 'SUPABASE_SECRET_KEY', 'SUPABASE_USER_ID'];
 for (const key of required)
@@ -161,18 +162,7 @@ try {
       }
       await sleep(200);
     }
-    const sleepDto = raw.sleep?.dailySleepDTO,
-      hrv = raw.hrv?.hrvSummary;
-    const daily = Array.isArray(raw.daily?.data) ? raw.daily.data[0] : null;
-    const value = (n) => (typeof n === 'number' && Number.isFinite(n) ? n : null);
-    const sleepSeconds = value(sleepDto?.sleepTimeSeconds),
-      hrvValue = value(hrv?.lastNightAvg),
-      resting = value(daily?.restingHeartRate);
-    const health = { user_id: userId, day, raw };
-    // A failed or empty endpoint must not erase previously collected values.
-    if (sleepSeconds !== null) health.sleep_hours = sleepSeconds / 3600;
-    if (hrvValue !== null && hrvValue > 0) health.hrv = hrvValue;
-    if (resting !== null) health.resting_hr = resting;
+    const health = { user_id: userId, day, raw, ...healthMetrics(raw) };
     check(
       await supabase.from('daily_health').upsert(health, { onConflict: 'user_id,day', defaultToNull: false }),
     );

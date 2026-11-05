@@ -2,6 +2,12 @@
 
 Dashboard personal para estudiar entrenamientos reales, alojable en GitHub Pages, con almacenamiento local o Supabase privado. Interfaz en español y fechas en Europe/Madrid.
 
+## Acceso a la instalación activa
+
+Abre [Rastro](https://eduardocvk.github.io/an-lisis_entrenos/) y pulsa **Iniciar sesión**. Utiliza el correo de tu cuenta de Supabase y la contraseña independiente que has establecido para Rastro. La URL y la clave publicable se incorporan al build desde variables de GitHub; no necesitas copiarlas en la web.
+
+El proyecto independiente `rastro-entrenos` está en la organización `eduardocvk`, plan Free y región `eu-west-3` (París). Las altas públicas están deshabilitadas. El proyecto anterior `analizador_gpx` permanece separado.
+
 ## Primera versión
 
 - Importación múltiple de FIT con el SDK oficial de Garmin, GPX con tiempos, ZIP de FIT y copias JSON de Rastro. Rechaza archivos dañados y actividades FIT que no sean de carrera. No contiene entrenamientos ficticios.
@@ -34,6 +40,8 @@ Vite muestra la URL y puerto reales. `base: './'` permite servir el build desde 
 ## GitHub Pages
 
 En Settings → Pages selecciona GitHub Actions como fuente y añade la variable de Actions `PAGES_ENABLED=true`. El workflow `.github/workflows/pages.yml` ejecuta pruebas, compila y publica `dist` al subir a `main` cuando esa variable está activa. Sin ella, valida y genera el artefacto, conservando la publicación desactivada hasta resolver el plan. En pull requests solo comprueba y compila.
+
+Las variables de Actions `SUPABASE_URL` y `SUPABASE_PUBLISHABLE_KEY` configuran automáticamente la conexión pública del build. Para desarrollo local, usa las mismas variables con prefijo `VITE_` en `.env.local`; [`.env.example`](.env.example) contiene el formato. Nunca añadas una clave secreta o `service_role` a variables `VITE_*`.
 
 **El código y los registros de Actions son públicos.** Las actividades, credenciales y archivos personales no se incluyen en Git ni en `dist`. Los datos de entrenamiento se conservan en el navegador o en Supabase con permisos privados. El sincronizador informa de servicios y códigos HTTP sin incluir identificadores de actividades ni fechas en sus errores HTTP.
 

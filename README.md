@@ -64,6 +64,8 @@ Estas políticas se entregan como código; hay que ejecutarlas y verificar su co
 
 ## Sincronización oficial de Garmin
 
+El workflow manual **Comprobar conexión Garmin** valida el secreto `GARMIN_PERSONAL_API_KEY` y el acceso al listado de carreras sin necesitar Supabase. No guarda archivos ni publica tokens o detalles de actividades. La sincronización completa es un workflow distinto y requiere las credenciales de Supabase.
+
 Usa la [Garmin Connect Personal API](https://developer.garmin.com/gc-developer-program/personal/personal-faq). La clave se genera en la web de Garmin Connect. No se utiliza scraping ni la contraseña de Garmin.
 
 En GitHub → Settings → Secrets and variables → Actions configura estos **secrets**:

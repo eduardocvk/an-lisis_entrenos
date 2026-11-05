@@ -1,5 +1,20 @@
 import { dayKey, weekly, finite, zoneSeconds } from './analysis.js';
 
+export function periodLabel(key, grouping) {
+  if (grouping === 'year') return key;
+  if (grouping === 'month')
+    return new Intl.DateTimeFormat('es-ES', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(
+      new Date(`${key}-01T12:00:00Z`),
+    );
+  const monday = new Date(`${key}T12:00:00Z`),
+    thursday = new Date(monday);
+  thursday.setUTCDate(thursday.getUTCDate() + 3);
+  const year = thursday.getUTCFullYear(),
+    first = new Date(`${year}-01-04T12:00:00Z`);
+  first.setUTCDate(first.getUTCDate() - ((first.getUTCDay() + 6) % 7));
+  return `Semana ${Math.round((monday - first) / 604800000) + 1} · ${year}`;
+}
+
 export function distanceGroups(activities, grouping = 'week') {
   const keyFor = (a) => {
     const day = dayKey(a.start);

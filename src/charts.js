@@ -30,6 +30,8 @@ export function chart(
     zoom = false,
     sessionsForPoint,
     onOpenSession,
+    sessionsTrigger = 'hover',
+    onPointSelect,
   },
 ) {
   const instance = echarts.init(el);
@@ -55,7 +57,7 @@ export function chart(
           row.textContent = `${point.seriesName}: ${value == null ? '—' : typeof value === 'number' ? value.toLocaleString('es-ES', { maximumFractionDigits: 2 }) : value} ${yName}`;
           root.append(row);
         }
-        if (sessionsForPoint) {
+        if (sessionsForPoint && sessionsTrigger === 'hover') {
           const sessions = new Map(points.flatMap((p) => sessionsForPoint(p)).map((a) => [a.id, a]));
           const list = document.createElement('div');
           list.className = 'tooltip-sessions';
@@ -102,6 +104,7 @@ export function chart(
       ...s,
     })),
   });
+  if (onPointSelect) instance.on('click', (point) => onPointSelect(point));
   const observer = new ResizeObserver(() => instance.resize());
   observer.observe(el);
   return {

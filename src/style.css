@@ -9,6 +9,18 @@
   --teal: #5966ce;
   --border: #e1e7e0;
 }
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 16px 0;
+}
+.pagination span {
+  font-size: 14px;
+  color: #697087;
+}
 .refresh-controls {
   display: flex;
   align-items: center;

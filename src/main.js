@@ -27,7 +27,8 @@ import {
 } from './store.js';
 import { drawMap } from './maps.js';
 import { chart } from './charts.js';
-import { chartSessions, distanceGroups } from './chart-sessions.js';
+import { chartSessions, distanceGroups, periodLabel } from './chart-sessions.js';
+import { paginate } from './pagination.js';
 
 const app = document.querySelector('#app');
 const views = [
@@ -68,6 +69,7 @@ const state = {
   sport: 'all',
   mapMode: 'coverage',
   grouping: 'week',
+  activityPage: 0,
   privacy: 0,
   selected: new Set(),
   detail: null,
@@ -120,6 +122,17 @@ function addChart(id, options) {
             ? distanceGroups(list, state.grouping)[p.dataIndex]?.sessions || []
             : chartSessions(id, p, list, state.zones),
         onOpenSession: openDetail,
+        sessionsTrigger: id === 'weekdays' ? 'none' : id === 'weekly' ? 'click' : 'hover',
+        onPointSelect:
+          id === 'weekly'
+            ? (p) => {
+                const group = distanceGroups(list, state.grouping)[p.dataIndex];
+                if (group)
+                  showDialog(
+                    `<h2>${esc(periodLabel(group.key, state.grouping))}</h2>${group.sessions.length ? rows(group.sessions.slice().sort((a, b) => b.start.localeCompare(a.start))) : '<p>Sin entrenamientos en este periodo.</p>'}`,
+                  );
+              }
+            : undefined,
       }),
     );
 }
@@ -138,6 +151,7 @@ function shell() {
   app.addEventListener('click', onClick);
   app.addEventListener('change', onChange);
   document.querySelector('#search').addEventListener('input', (e) => {
+    state.activityPage = 0;
     state.search = e.target.value;
     renderContent();
   });
@@ -198,7 +212,7 @@ function renderContent() {
     const groups = distanceGroups(list, state.grouping);
     document.querySelector('#distance-grouping').value = state.grouping;
     addChart('weekly', {
-      labels: groups.map((g) => g.key),
+      labels: groups.map((g) => periodLabel(g.key, state.grouping)),
       yName: 'km',
       zoom: true,
       series: [{ name: 'Distancia', type: 'bar', data: groups.map((g) => +(g.distance / 1000).toFixed(2)) }],
@@ -236,8 +250,11 @@ function renderContent() {
     });
     resources.push(drawMap(document.querySelector('#mini-map'), list, 'coverage', openDetail));
   } else if (state.view === 'activities') {
+    const page = paginate(list, state.activityPage);
+    state.activityPage = page.page;
     content.innerHTML =
-      panel('Todas tus sesiones', 'Marca hasta cuatro actividades para compararlas', rows(list, true)) +
+      panel('Entrenamientos', 'Marca hasta cuatro actividades para compararlas', rows(page.items, true)) +
+      `<nav class="pagination" aria-label="Páginas de entrenamientos"><button class="secondary" data-activity-page="${page.page - 1}" ${page.page === 0 ? 'disabled' : ''}>Anterior</button><span>${page.first}–${page.last} de ${page.total} · Página ${page.page + 1} de ${page.pages}</span><button class="secondary" data-activity-page="${page.page + 1}" ${page.page + 1 === page.pages ? 'disabled' : ''}>Siguiente</button></nav>` +
       `<button class="primary" data-view="compare">Abrir comparador (${state.selected.size})</button>`;
   } else if (state.view === 'map') {
     content.innerHTML = panel(
@@ -680,7 +697,11 @@ async function onClick(event) {
   const target = event.target.closest('button');
   if (!target) return;
   try {
-    if (target.dataset.view) {
+    if (target.hasAttribute('data-activity-page')) {
+      state.activityPage = Number(target.dataset.activityPage);
+      renderContent();
+      document.querySelector('[data-activity-page]:not(:disabled)')?.focus({ preventScroll: true });
+    } else if (target.dataset.view) {
       if (state.detail) document.querySelector('#dialog').close();
       state.view = target.dataset.view;
       history.replaceState(null, '', `#${state.view}`);
@@ -692,6 +713,7 @@ async function onClick(event) {
     else if (target.hasAttribute('data-close')) document.querySelector('#dialog').close();
     else if (target.hasAttribute('data-refresh')) await refresh();
     else if (target.id === 'reset') {
+      state.activityPage = 0;
       state.from = '';
       state.to = '';
       state.search = '';
@@ -714,6 +736,7 @@ function onChange(event) {
     return;
   }
   if (['from', 'to', 'sport'].includes(e.id)) {
+    state.activityPage = 0;
     state[e.id] = e.value;
     renderContent();
   } else if (e.id === 'map-mode') {

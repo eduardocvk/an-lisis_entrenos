@@ -10,6 +10,8 @@ El proyecto independiente `rastro-entrenos` está en la organización `eduardocv
 
 ## Primera versión
 
+Entrenamientos presenta 50 filas por página, empezando por las sesiones más recientes; los filtros reinician la paginación y la selección para comparar se conserva entre páginas. En Distancia por periodo, pasar el ratón muestra el periodo y su distancia, y pulsar una barra abre la lista de sesiones. Cuándo corres muestra únicamente el día de la semana y el número de sesiones.
+
 La distancia se muestra en un único gráfico agrupable por semana (lunes a domingo), mes o año. Las ventanas de los gráficos permiten abrir las sesiones asociadas, con fecha y hora; los agregados incluyen la lista completa. El mapa muestra también fecha y hora. El estado de actualización aparece junto a su botón, con Importar a su izquierda.
 
 La interfaz usa azul tinta, violeta y coral, texto ampliado y explicaciones desplegables. La vista general añade volumen mensual, frecuencia por día de la semana y duración por sesión. Recuperación muestra todos los registros sincronizados y el número de días con mediciones reales.

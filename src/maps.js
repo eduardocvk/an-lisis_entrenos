@@ -51,7 +51,7 @@ export function drawMap(container, activities, mode = 'coverage', onSelect = () 
           { color: '#087f79', weight: 3, opacity: 0.55 },
         ).addTo(map);
         const label = document.createElement('span');
-        label.textContent = activity.name;
+        label.textContent = `${new Intl.DateTimeFormat('es-ES', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Europe/Madrid' }).format(new Date(activity.start))} · ${activity.name}`;
         line.bindTooltip(label);
         line.on('click', () => onSelect(activity.id));
         bounds.extend(line.getBounds());

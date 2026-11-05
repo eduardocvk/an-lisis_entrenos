@@ -27,6 +27,7 @@ import {
 } from './store.js';
 import { drawMap } from './maps.js';
 import { chart } from './charts.js';
+import { chartSessions, distanceGroups } from './chart-sessions.js';
 
 const app = document.querySelector('#app');
 const views = [
@@ -66,6 +67,7 @@ const state = {
   search: '',
   sport: 'all',
   mapMode: 'coverage',
+  grouping: 'week',
   privacy: 0,
   selected: new Set(),
   detail: null,
@@ -108,7 +110,18 @@ const plot = (id, description) =>
   `<div id="${id}" class="chart" role="img" aria-label="${esc(description)}"></div>`;
 function addChart(id, options) {
   const el = document.getElementById(id);
-  if (el) resources.push(chart(el, options));
+  const list = filtered().filter((a) => !id.startsWith('comparison') || state.selected.has(a.id));
+  if (el)
+    resources.push(
+      chart(el, {
+        ...options,
+        sessionsForPoint: (p) =>
+          id === 'weekly'
+            ? distanceGroups(list, state.grouping)[p.dataIndex]?.sessions || []
+            : chartSessions(id, p, list, state.zones),
+        onOpenSession: openDetail,
+      }),
+    );
 }
 function rows(list, select = false) {
   return `<div class="table-wrap"><table><thead><tr>${select ? '<th>Comparar</th>' : ''}<th>Entrenamiento</th><th>Distancia</th><th>Tiempo</th><th>Ritmo</th><th>Pulso</th><th>Desnivel +</th></tr></thead><tbody>${list.map((a) => `<tr>${select ? `<td><input type="checkbox" data-compare="${esc(a.id)}" aria-label="Comparar ${esc(a.name)}" ${state.selected.has(a.id) ? 'checked' : ''}></td>` : ''}<td><button class="activity-link" data-detail="${esc(a.id)}">${esc(a.name)}</button><small>${date(a.start)} · ${/trail/i.test(a.sport) ? 'Trail' : 'Carrera'}</small></td><td>${num(a.distance / 1000, 2)} km</td><td>${duration(a.duration)}</td><td>${pace(activityPace(a))}<small>/km</small></td><td>${num(a.avgHr)}<small>ppm</small></td><td>${num(a.ascent)} m</td></tr>`).join('')}</tbody></table></div>`;
@@ -116,6 +129,12 @@ function rows(list, select = false) {
 
 function shell() {
   app.innerHTML = `<aside class="sidebar"><a href="#overview" class="brand"><span class="brand-mark">r.</span> rastro<span class="brand-dot">●</span></a><p class="nav-caption">TU CUADERNO DE CARRERA</p><nav aria-label="Secciones">${views.map(([id, label, path]) => `<button data-view="${id}">${icon(path)}<span>${label}</span></button>`).join('')}</nav><div class="sidebar-bottom"><div class="privacy-note">${icon('M12 3l8 4v5c0 5-8 9-8 9s-8-4-8-9V7z')}<span>Tus datos, tu recorrido<small id="storage-label">Almacenamiento en este navegador</small></span></div><button data-settings>${icon('M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8 M12 2v3 M12 19v3 M2 12h3 M19 12h3')}<span>Conexión y ajustes</span></button></div></aside><div class="workspace"><header><span class="breadcrumb">ENTRENAMIENTO <span>/</span> CARRERA</span><div class="header-actions"><button data-settings class="icon-button" aria-label="Conexión y ajustes" title="Conexión y ajustes">⚙</button><button id="account" data-settings class="status-pill">Iniciar sesión</button><button data-refresh class="secondary">Actualizar datos</button><button data-import class="primary">+ Importar</button></div></header><main><div id="notice" class="notice" role="status" aria-live="polite" hidden></div><div class="page-heading"><div><p class="eyebrow">CADA CARRERA CUENTA</p><h1 id="page-title"></h1><p id="page-subtitle"></p></div><button class="secondary" data-export>Exportar copia</button></div><div class="filters"><label>Desde<input type="date" id="from"></label><label>Hasta<input type="date" id="to"></label><label>Modalidad<select id="sport"><option value="all">Toda la carrera</option><option value="road">Carrera</option><option value="trail">Trail</option></select></label><label class="search">Buscar<input type="search" id="search" placeholder="Nombre o etiqueta…"></label><button class="text-button" id="reset">Todo el histórico</button></div><div id="content"></div><footer>RASTRO <span>Tu progreso, con perspectiva.</span><span id="count"></span></footer></main></div><input id="files" type="file" accept=".fit,.gpx,.zip,.json" multiple hidden><dialog id="dialog"></dialog>`;
+  const refreshButton = document.querySelector('[data-refresh]');
+  refreshButton.before(document.querySelector('header [data-import]'));
+  const refreshControls = document.createElement('div');
+  refreshControls.className = 'refresh-controls';
+  refreshButton.before(refreshControls);
+  refreshControls.append(refreshButton, document.querySelector('#notice'));
   app.addEventListener('click', onClick);
   app.addEventListener('change', onChange);
   document.querySelector('#search').addEventListener('input', (e) => {
@@ -175,34 +194,23 @@ function renderContent() {
     const distance = list.reduce((s, a) => s + a.distance, 0),
       seconds = list.reduce((s, a) => s + a.duration, 0),
       weeks = weekly(list);
-    content.innerHTML = `<div class="metrics">${metric('DISTANCIA', num(distance / 1000, 1), 'km', `${list.length} sesiones en el periodo`)}${metric('TIEMPO DE CARRERA', num(seconds / 3600, 1), 'h', 'Tiempo registrado de entrenamiento')}${metric('RITMO GLOBAL', pace(seconds / (distance / 1000)), '/km', 'Ponderado por distancia')}${metric('DESNIVEL POSITIVO', list.some((a) => finite(a.ascent)) ? num(list.reduce((s, a) => s + (a.ascent || 0), 0)) : '—', 'm', `${list.filter((a) => finite(a.ascent)).length} sesiones con dato de ascenso`)}</div><div class="two-col">${panel('Kilómetros que suman', 'Volumen semanal · semanas desde el lunes', plot('weekly', 'Kilómetros por semana'))}${panel('Tu territorio', 'Recorridos del periodo seleccionado', '<div id="mini-map" class="mini-map"></div>')}</div>${panel('Últimas carreras', 'Abre una sesión para explorar sus datos', rows(list.slice(0, 6)))}<div class="info-strip">La comparación gana valor con sesiones de terreno, duración y condiciones similares. Los datos ausentes se muestran con «—».</div>`;
+    content.innerHTML = `<div class="metrics">${metric('DISTANCIA', num(distance / 1000, 1), 'km', `${list.length} sesiones en el periodo`)}${metric('TIEMPO DE CARRERA', num(seconds / 3600, 1), 'h', 'Tiempo registrado de entrenamiento')}${metric('RITMO GLOBAL', pace(seconds / (distance / 1000)), '/km', 'Ponderado por distancia')}${metric('DESNIVEL POSITIVO', list.some((a) => finite(a.ascent)) ? num(list.reduce((s, a) => s + (a.ascent || 0), 0)) : '—', 'm', `${list.filter((a) => finite(a.ascent)).length} sesiones con dato de ascenso`)}</div><div class="two-col">${panel('Distancia por periodo', 'Suma de las distancias de las sesiones. Las semanas van de lunes a domingo.', '<label class="grouping-control">Agrupar por<select id="distance-grouping"><option value="week">Semana</option><option value="month">Mes</option><option value="year">Año</option></select></label>' + plot('weekly', 'Distancia agrupada por periodo'))}${panel('Tu territorio', 'Recorridos del periodo seleccionado', '<div id="mini-map" class="mini-map"></div>')}</div>${panel('Últimas carreras', 'Abre una sesión para explorar sus datos', rows(list.slice(0, 6)))}<div class="info-strip">La comparación gana valor con sesiones de terreno, duración y condiciones similares. Los datos ausentes se muestran con «—».</div>`;
+    const groups = distanceGroups(list, state.grouping);
+    document.querySelector('#distance-grouping').value = state.grouping;
     addChart('weekly', {
-      labels: weeks.map((w) => w.date),
+      labels: groups.map((g) => g.key),
       yName: 'km',
-      series: [
-        {
-          name: 'Distancia',
-          type: 'bar',
-          data: weeks.map((w) => +(w.distance / 1000).toFixed(2)),
-          itemStyle: { borderRadius: [5, 5, 0, 0] },
-        },
-      ],
+      zoom: true,
+      series: [{ name: 'Distancia', type: 'bar', data: groups.map((g) => +(g.distance / 1000).toFixed(2)) }],
     });
-    const months = new Map();
     const weekdays = Array(7).fill(0);
-    for (const a of list) {
-      const key = dayKey(a.start).slice(0, 7);
-      months.set(key, (months.get(key) || 0) + a.distance / 1000);
-      weekdays[(new Date(dayKey(a.start) + 'T12:00:00Z').getUTCDay() + 6) % 7]++;
-    }
-    const orderedMonths = [...months.keys()].sort();
+    list.forEach((a) => weekdays[(new Date(dayKey(a.start) + 'T12:00:00Z').getUTCDay() + 6) % 7]++);
     document
       .querySelector('#weekly')
       .closest('.two-col')
       .insertAdjacentHTML(
         'afterend',
         '<div class="analytics-grid">' +
-          panel('Volumen mensual', 'Kilómetros registrados por mes', plot('monthly', 'Kilómetros por mes')) +
           panel(
             'Cuándo corres',
             'Número de sesiones por día de la semana',
@@ -211,16 +219,10 @@ function renderContent() {
           panel(
             'Duración de las sesiones',
             'Minutos por entrenamiento',
-            plot('session-duration', 'Duración de cada entrenamiento'),
+            plot('session-duration', 'Duración por sesión'),
           ) +
           '</div>',
       );
-    addChart('monthly', {
-      labels: orderedMonths,
-      yName: 'km',
-      zoom: true,
-      series: [{ name: 'Distancia', type: 'bar', data: orderedMonths.map((k) => +months.get(k).toFixed(1)) }],
-    });
     addChart('weekdays', {
       labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
       yName: 'sesiones',
@@ -666,11 +668,7 @@ async function refresh() {
       }
     } else state.activities = await localLoad();
     render();
-    toast(
-      state.user
-        ? 'Datos leídos de Supabase. La descarga desde Garmin se ejecuta en GitHub Actions.'
-        : 'Datos locales actualizados.',
-    );
+    toast(state.user ? 'Datos actualizados' : 'Datos locales actualizados.');
   } catch (e) {
     toast(`No se pudieron actualizar los datos: ${e.message}`, true);
     throw e;
@@ -710,6 +708,11 @@ async function onClick(event) {
 }
 function onChange(event) {
   const e = event.target;
+  if (e.id === 'distance-grouping') {
+    state.grouping = e.value;
+    renderContent();
+    return;
+  }
   if (['from', 'to', 'sport'].includes(e.id)) {
     state[e.id] = e.value;
     renderContent();

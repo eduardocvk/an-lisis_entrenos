@@ -10,6 +10,8 @@ El proyecto independiente `rastro-entrenos` está en la organización `eduardocv
 
 ## Primera versión
 
+La distancia se muestra en un único gráfico agrupable por semana (lunes a domingo), mes o año. Las ventanas de los gráficos permiten abrir las sesiones asociadas, con fecha y hora; los agregados incluyen la lista completa. El mapa muestra también fecha y hora. El estado de actualización aparece junto a su botón, con Importar a su izquierda.
+
 La interfaz usa azul tinta, violeta y coral, texto ampliado y explicaciones desplegables. La vista general añade volumen mensual, frecuencia por día de la semana y duración por sesión. Recuperación muestra todos los registros sincronizados y el número de días con mediciones reales.
 
 El workflow **Completar histórico Garmin** recorre todas las carreras, omite las ya importadas y consulta hasta 90 días pendientes de recuperación por ejecución desde la primera carrera conocida. Se ejecuta cada hora mientras `GARMIN_SYNC_ENABLED=true`; comparte el bloqueo con la sincronización habitual. Un día sin medición no se convierte en cero. Los errores temporales quedan pendientes de reintento. La disponibilidad anterior depende del histórico conservado por Garmin y de los dispositivos utilizados.

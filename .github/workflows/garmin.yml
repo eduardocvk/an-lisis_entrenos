@@ -1,0 +1,44 @@
+name: Sincronizar Garmin (privado)
+on:
+  workflow_dispatch:
+    inputs:
+      full_history:
+        description: Recorrer todo el histórico; repetir para continuar lotes pendientes
+        type: boolean
+        default: false
+      start_date:
+        description: Fecha inicial opcional (YYYY-MM-DD)
+        type: string
+      max_activities:
+        description: Máximo de actividades nuevas por ejecución
+        type: string
+        default: '100'
+  schedule:
+    - cron: '17 5,17 * * *'
+permissions:
+  contents: read
+concurrency:
+  group: garmin-private-sync
+  cancel-in-progress: false
+jobs:
+  sync:
+    # No genera fallos programados hasta que se active explícitamente.
+    if: github.event_name == 'workflow_dispatch' || vars.GARMIN_SYNC_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run sync:garmin
+        env:
+          GARMIN_PERSONAL_API_KEY: ${{ secrets.GARMIN_PERSONAL_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          SUPABASE_USER_ID: ${{ secrets.SUPABASE_USER_ID }}
+          FULL_HISTORY: ${{ inputs.full_history }}
+          START_DATE: ${{ inputs.start_date }}
+          MAX_ACTIVITIES: ${{ inputs.max_activities || '100' }}

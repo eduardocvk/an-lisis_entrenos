@@ -26,7 +26,12 @@ async function request(path, options = {}) {
     const response = await fetch(base + path, { ...options, signal: AbortSignal.timeout(60000) });
     if (response.ok) return response;
     if ((response.status === 429 || response.status >= 500) && attempt < 3) {
-      await sleep(2000 * 2 ** attempt);
+      const retryAfter = Number(response.headers.get('retry-after'));
+      const delay =
+        response.status === 429
+          ? Math.min(600, Math.max(60, retryAfter || 60 * 2 ** attempt)) * 1000
+          : 2000 * 2 ** attempt;
+      await sleep(delay);
       continue;
     }
     // Actions logs are public: report the service, never activity IDs or dates.
@@ -141,7 +146,7 @@ try {
         issues.push(e.message);
         console.error(`Una actividad no se ha importado: ${e.message}`);
       }
-      await sleep(250);
+      await sleep(1500);
     }
     if (batch.length < 50) break;
     start += 50;
@@ -194,7 +199,7 @@ try {
         if (e.message.includes('HTTP 404')) raw[key] = null;
         else issues.push(e.message);
       }
-      await sleep(200);
+      await sleep(1000);
     }
     const health = { user_id: userId, day, raw, ...healthMetrics(raw) };
     if (Object.keys(raw).length !== 3) continue;

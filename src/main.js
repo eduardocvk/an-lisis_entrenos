@@ -69,6 +69,7 @@ const state = {
   sport: 'all',
   mapMode: 'coverage',
   grouping: 'week',
+  durationGrouping: 'day',
   activityPage: 0,
   privacy: 0,
   selected: new Set(),
@@ -120,7 +121,9 @@ function addChart(id, options) {
         sessionsForPoint: (p) =>
           id === 'weekly'
             ? distanceGroups(list, state.grouping)[p.dataIndex]?.sessions || []
-            : chartSessions(id, p, list, state.zones),
+            : id === 'session-duration' && state.durationGrouping !== 'day'
+              ? distanceGroups(list, state.durationGrouping)[p.dataIndex]?.sessions || []
+              : chartSessions(id, p, list, state.zones),
         onOpenSession: openDetail,
         sessionsTrigger: id === 'weekdays' ? 'none' : id === 'weekly' ? 'click' : 'hover',
         onPointSelect:
@@ -237,16 +240,47 @@ function renderContent() {
           ) +
           '</div>',
       );
+    const overview = document.querySelector('#weekly').closest('.two-col');
+    const analytics = overview.nextElementSibling;
+    const panels = analytics.querySelectorAll(':scope > .panel');
+    const territory = document.querySelector('#mini-map').closest('.panel');
+    overview.append(panels[0]);
+    const durationPanel = panels[1];
+    analytics.replaceWith(durationPanel);
+    durationPanel.after(territory);
+    territory.classList.add('overview-territory');
+    const selector = document.createElement('label');
+    selector.className = 'grouping-control';
+    selector.innerHTML =
+      'Agrupar por<select id="duration-grouping"><option value="day">Sesión</option><option value="week">Semana</option><option value="month">Mes</option><option value="year">Año</option></select>';
+    durationPanel.querySelector('.panel-heading').after(selector);
+    selector.querySelector('select').value = state.durationGrouping;
     addChart('weekdays', {
       labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
       yName: 'sesiones',
       series: [{ name: 'Sesiones', type: 'bar', data: weekdays }],
     });
+    const durationGroups =
+      state.durationGrouping === 'day'
+        ? [...list].reverse().map((a) => ({ key: date(a.start), sessions: [a] }))
+        : distanceGroups(list, state.durationGrouping).map((g) => ({
+            ...g,
+            key: periodLabel(g.key, state.durationGrouping),
+          }));
     addChart('session-duration', {
-      labels: [...list].reverse().map((a) => date(a.start)),
+      labels: durationGroups.map((g) => g.key),
       yName: 'min',
       zoom: true,
-      series: [{ name: 'Duración', data: [...list].reverse().map((a) => +(a.duration / 60).toFixed(1)) }],
+      series: [
+        {
+          name: 'Duración media',
+          data: durationGroups.map((g) =>
+            g.sessions.length
+              ? +(g.sessions.reduce((sum, a) => sum + a.duration, 0) / g.sessions.length / 60).toFixed(1)
+              : null,
+          ),
+        },
+      ],
     });
     resources.push(drawMap(document.querySelector('#mini-map'), list, 'coverage', openDetail));
   } else if (state.view === 'activities') {
@@ -730,6 +764,11 @@ async function onClick(event) {
 }
 function onChange(event) {
   const e = event.target;
+  if (e.id === 'duration-grouping') {
+    state.durationGrouping = e.value;
+    renderContent();
+    return;
+  }
   if (e.id === 'distance-grouping') {
     state.grouping = e.value;
     renderContent();
